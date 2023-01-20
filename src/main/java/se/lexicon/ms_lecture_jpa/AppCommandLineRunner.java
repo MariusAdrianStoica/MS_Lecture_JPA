@@ -15,6 +15,7 @@ public class AppCommandLineRunner implements CommandLineRunner {
     StudentDao studentDao;
     @Override
     public void run(String... args) throws Exception {
+        //used to add some date in DB during runtime
 
         System.out.println("####################");
         Student createdStudent1= studentDao.persist(new Student(
