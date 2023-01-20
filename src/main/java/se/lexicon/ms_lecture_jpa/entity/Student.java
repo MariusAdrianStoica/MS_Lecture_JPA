@@ -1,4 +1,5 @@
-package se.lexicon.ms_lecture_jpa.model;
+package se.lexicon.ms_lecture_jpa.entity;
+
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -6,7 +7,9 @@ import javax.persistence.*; // JPA specification in persistence from -> javax (j
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
+
+//if we define student as a DB
+// -> it is better to change the name of the package from "model" to "entity"
 
 @Entity //add @Entity in front of the class -> in order to define this Java class as a DB table
 //@Table(name = "TBL_STUDENTS") // @Table(name = "") -> we can choose the name for the DB table
@@ -43,6 +46,13 @@ public class Student {
         this.registrationDate = LocalDateTime.now(); // default value now()
     }
 
+    public Student(String firstName, String lastName, String email, LocalDate birthDate) {
+        this();//in order to reuse the setting for previous constructor(status, regDate)
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.birthDate = birthDate;
+    }
 
     //setter & getter
 
