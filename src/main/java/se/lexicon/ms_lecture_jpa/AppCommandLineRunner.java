@@ -4,14 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import se.lexicon.ms_lecture_jpa.dao.AddressDao;
-import se.lexicon.ms_lecture_jpa.dao.BookDao;
-import se.lexicon.ms_lecture_jpa.dao.CourseDao;
-import se.lexicon.ms_lecture_jpa.dao.StudentDao;
-import se.lexicon.ms_lecture_jpa.entity.Address;
-import se.lexicon.ms_lecture_jpa.entity.Book;
-import se.lexicon.ms_lecture_jpa.entity.Course;
-import se.lexicon.ms_lecture_jpa.entity.Student;
+import se.lexicon.ms_lecture_jpa.dao.*;
+import se.lexicon.ms_lecture_jpa.entity.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -31,6 +25,9 @@ public class AppCommandLineRunner implements CommandLineRunner {
     @Autowired
     CourseDao courseDao;
 
+    @Autowired
+    CompetenceDao competenceDao;
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {
@@ -49,7 +46,7 @@ public class AppCommandLineRunner implements CommandLineRunner {
 
         */
 
-        ex5();
+        ex6();
 
     }
     public void ex1(){
@@ -150,13 +147,40 @@ public class AppCommandLineRunner implements CommandLineRunner {
         Student createdStudent1 = studentDao.persist(studentData);
 
         cSharp.addStudent(createdStudent1);
+    }
+
+    public void ex6(){
+
+        Competence javaSE = competenceDao.persist(new Competence("Java SE"));
+        Competence spring = competenceDao.persist(new Competence("Spring Core"));
+        Competence springBoot = competenceDao.persist(new Competence("Spring Boot"));
 
 
+        Student studentData = new Student("Test", "Test", "test.test1@test.se", LocalDate.parse("2020-01-01"));
+        studentData.setAddress(new Address("Växjö","Teleborg", "35264"));
+        Student createdStudent1 = studentDao.persist(studentData);
+        System.out.println("createdStudent1 >>>>> " + createdStudent1);
 
 
+        Student studentData2 = new Student("Test", "Test", "test.test2@test.se", LocalDate.parse("2020-01-01"));
+        studentData2.setAddress(new Address("Växjö","Teleborg", "35264"));
+        Student createdStudent2 = studentDao.persist(studentData2);
+        System.out.println("createdStudent2 >>>>> " + createdStudent2);
 
 
+        spring.addStudent(createdStudent1);
+        spring.addStudent(createdStudent2);
+
+        springBoot.addStudent(createdStudent1);
+
+        createdStudent1.addCompetence(javaSE);
+        createdStudent1.addCompetence(spring);
+        createdStudent1.addCompetence(springBoot);
+
+
+        createdStudent1.removeCompetence(springBoot);
 
 
     }
+
 }
