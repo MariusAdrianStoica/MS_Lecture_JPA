@@ -1,11 +1,12 @@
 package se.lexicon.ms_lecture_jpa.entity;
 
-
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*; // JPA specification in persistence from -> javax (java extension)
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 //if we define student as a DB
@@ -39,6 +40,36 @@ public class Student {
     private boolean status;
     private LocalDateTime registrationDate;
 
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    //Address without a Student has no meaning,
+    // ->that's why when user remove a Student, we must remove also his address
+    // technique is called CASCADE (after @OneToOne)
+    // PERSIST & REMOVE -> when we Create or Remove Student, we have to handle also the address
+    // MERGE & REFRESH -> when we update & when we modify the address, we need also to refresh the student
+    // DETACH -> when we want to detach the student from the address
+
+
+    @JoinColumn(name = "address_id")
+    // address_id in table Student is the same with id from table Address
+    private Address address;
+    // we created a new field to make connection between Student and address
+
+    @OneToMany(mappedBy = "borrower", orphanRemoval = true)
+    //if we want to customize @OneToMany - Cascade.DETACH, cascade.REFRESH - or nothing
+    //if we add Cascade.Remove -> when a Student is removed, all the borrowed books are removed
+    //-> that's why we use orphanRemoval
+
+    private List<Book> borrowedBooks;
+    // because we have a list, it is better if we write methods (before hashCode)
+    // to borrowBook & returnBook
+
+
+
+    //in order to use Bidirectional , we need to use mappedBy
+    @ManyToMany(mappedBy = "participants")
+    private List<Course> enrolledCourses;
+
+
     //constructors
 
     public Student() {
@@ -47,11 +78,20 @@ public class Student {
     }
 
     public Student(String firstName, String lastName, String email, LocalDate birthDate) {
-        this();//in order to reuse the setting for previous constructor(status, regDate)
+        this();//in order to reuse the setting from previous constructor(status, regDate)
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.birthDate = birthDate;
+    }
+
+    public Student(String firstName, String lastName, String email, LocalDate birthDate, Address address) {
+        this();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.birthDate = birthDate;
+        setAddress(address);
     }
 
     //setter & getter
@@ -116,6 +156,72 @@ public class Student {
     public void setRegistrationDate(LocalDateTime registrationDate) {
         this.registrationDate = registrationDate;
     }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        //bi directional
+        if (address!= null) address.setStudent(this);
+        this.address = address;
+    }
+
+    public List<Book> getBorrowedBooks() {
+        return borrowedBooks;
+    }
+
+    public void setBorrowedBooks(List<Book> borrowedBooks) {
+        this.borrowedBooks = borrowedBooks;
+    }
+
+
+    public List<Course> getEnrolledCourses() {
+        if (enrolledCourses == null) enrolledCourses = new ArrayList<>();
+        return enrolledCourses;
+    }
+
+    public void setEnrolledCourses(List<Course> enrolledCourses) {
+        this.enrolledCourses = enrolledCourses;
+    }
+
+
+
+    public void borrowBook(Book book){
+        if(book == null) throw new IllegalArgumentException("book data was null");
+        if (borrowedBooks == null) borrowedBooks=new ArrayList<>();
+        borrowedBooks.add(book);
+        //because it is a bidirectional relation, we need to say to the other side - who borrowed the book
+        book.setBorrower(this);
+
+    }
+
+    public void returnBook(Book book){
+        if(book == null) throw new IllegalArgumentException("book data was null");
+        if (borrowedBooks != null){
+            book.setBorrower(null); //when a book is returned, it will not have a borrower
+            borrowedBooks.remove(book);
+        }
+
+
+    }
+
+    public void enrollCourse(Course course){
+        if (course == null) throw new IllegalArgumentException("Course data was null");
+        if(enrolledCourses == null) enrolledCourses = new ArrayList<>();
+
+        enrolledCourses.add(course);
+        course.getParticipants().add(this);
+
+    }
+
+    public void unEnrollCourse(Course course){
+        if (course == null) throw new IllegalArgumentException("Course data was null");
+
+        course.getParticipants().remove(this);
+        enrolledCourses.remove(course);
+    }
+
 
 
     //equal & hashCode

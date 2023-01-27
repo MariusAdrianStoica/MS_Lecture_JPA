@@ -27,8 +27,9 @@ public class StudentDaoImplTest {
     //step2: copy application properties from H2
     //step3: @SpringBootTest in from of the class
     //step4: @AutoConfigureTestDatabase -> to use a temp DB and not our original SqL DB
-    //step5: @AutoConfigureTestEntityManager -> provides functionalities
-    //step6: @DirtiesContext - to remove temp DB at the end of the test
+    //step5: @Transactional -> each method has one transaction
+    //step6: @AutoConfigureTestEntityManager -> provides functionalities
+    //step7: @DirtiesContext - to remove temp DB at the end of the test
 
 
     @Autowired //in order to inject em in StudentDaoImplTest
